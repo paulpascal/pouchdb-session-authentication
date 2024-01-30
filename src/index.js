@@ -6,7 +6,7 @@ const cookieRegex = new RegExp(`${sessionCookieName}=(.*)`);
 const sessions = {};
 
 const parseCookie = (response) => {
-  const cookie = response.headers && response.headers.get('set-cookie');
+  const cookie = response?.headers?.get('set-cookie');
   if (!cookie) {
     return;
   }
@@ -22,12 +22,10 @@ const parseCookie = (response) => {
   }
 
   const parts = matches[1].split(';').map(item => item.trim().split('='));
-  const session = {
+  return {
     token: parts[0][0],
     expires: new Date(parts.find(part => part[0] === 'Expires')[1]).valueOf(),
   };
-
-  return session;
 };
 
 const getExistingSession = (db) => {
@@ -79,12 +77,11 @@ const invalidateSession = db => {
 
 const isExpired = (session) => {
   return Date.now() > session.expires;
-}
+};
 
 const extractAuth = (opts) => {
   if (opts.auth) {
     opts.credentials = opts.auth;
-    //delete opts.auth;
   }
 
   const url = new URL(opts.name);
@@ -96,9 +93,6 @@ const extractAuth = (opts) => {
     username: url.username,
     password: url.password
   };
-
-  // url.username = url.password = '';
-  // opts.name = url.toString();
 };
 
 // eslint-disable-next-line func-style

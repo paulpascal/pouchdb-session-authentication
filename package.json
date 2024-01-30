@@ -4,7 +4,13 @@
   "description": "Plugin that forces session authentication for PouchDb http adapter",
   "main": "src/index.js",
   "scripts": {
-    "test": "nyc mocha ./test/unit/*.js"
+    "unit": "nyc mocha ./test/unit/*.js",
+    "lint": "eslint .",
+    "test": "npm run lint && npm run unit"
+  },
+  "engines": {
+    "node": ">=16.12.0",
+    "npm": ">=8.3.1"
   },
   "author": "Diana Barsan",
   "license": "AGPL-3.0-only",
@@ -15,6 +21,7 @@
     "@medic/eslint-config": "^1.1.0",
     "chai": "^4.4.1",
     "eslint": "^8.56.0",
+    "eslint-plugin-node": "^11.1.0",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
     "rewire": "^7.0.0",

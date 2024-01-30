@@ -12,6 +12,12 @@ let httpsAdapter;
 let fetch;
 let db;
 let clock;
+
+const getSession = (string, date) => {
+  date = date || new Date().toString();
+  return `AuthSession=${string}; Version=1; Expires=${date}; Max-Age=31536000; Path=/; HttpOnly`;
+};
+
 describe('Pouchdb Session authentication plugin', () => {
   beforeEach(() => {
     plugin = rewire('../../src/index');
@@ -94,7 +100,7 @@ describe('Pouchdb Session authentication plugin', () => {
     });
 
     it('should handle the case where the db does not have a custom fetch function', () => {
-      db = { name: 'http://localhost:5984/db',auth: { username: 'admin', password: 'pass' }};
+      db = { name: 'http://localhost:5984/db', auth: { username: 'admin', password: 'pass' }};
       plugin(PoudhDb);
       PoudhDb.adapters.http(db);
 
@@ -113,7 +119,7 @@ describe('Pouchdb Session authentication plugin', () => {
       fetch.withArgs('http://localhost:5984/_session').resolves({
         ok: true,
         status: 200,
-        headers: new Headers({ 'set-cookie': 'AuthSession=YWRtaW46NjU5RDRFMzI6Qi5U7t5gHQMn4MgOYkEAX2qH5HZUpn6nKdX8Ik7gDpY; Version=1; Expires=Wed,08-Jan-2025 13:46:26 GMT; Max-Age=31536000; Path=/; HttpOnly' })
+        headers: new Headers({ 'set-cookie': getSession('sess') }),
       });
       const response = await db.fetch('randomUrl');
 
@@ -133,12 +139,12 @@ describe('Pouchdb Session authentication plugin', () => {
       ]);
       expect(fetch.args[1]).to.deep.equal([
         'randomUrl',
-        { headers: new Headers({ 'AuthSession': 'YWRtaW46NjU5RDRFMzI6Qi5U7t5gHQMn4MgOYkEAX2qH5HZUpn6nKdX8Ik7gDpY' }) }
+        { headers: new Headers({ 'AuthSession': 'sess' }) }
       ]);
     });
 
     it('should use existing session for an existent db for an existent domain', async () => {
-      db = { name: 'http://localhost:5984',auth: { username: 'admin', password: 'pass' }};
+      db = { name: 'http://localhost:5984', auth: { username: 'admin', password: 'pass' }};
       plugin(PoudhDb);
       PoudhDb.adapters.http(db);
 
@@ -146,7 +152,7 @@ describe('Pouchdb Session authentication plugin', () => {
       fetch.withArgs('http://localhost:5984/_session').resolves({
         ok: true,
         status: 200,
-        headers: new Headers({ 'set-cookie': 'AuthSession=session1; Version=1; Expires=Wed,08-Jan-2025 13:46:26 GMT; Max-Age=31536000; Path=/; HttpOnly' })
+        headers: new Headers({ 'set-cookie': getSession('session1') })
       });
       await db.fetch('randomUrl1');
       await db.fetch('randomUrl2');
@@ -185,7 +191,7 @@ describe('Pouchdb Session authentication plugin', () => {
       fetch.withArgs('http://localhost:5984/_session').resolves({
         ok: true,
         status: 200,
-        headers: new Headers({ 'set-cookie': 'AuthSession=session1; Version=1; Expires=Wed,08-Jan-2025 13:46:26 GMT; Max-Age=31536000; Path=/; HttpOnly' })
+        headers: new Headers({ 'set-cookie': getSession('session1') })
       });
       await db1.fetch('http://localhost:5984/db1');
       await db2.fetch('http://localhost:5984/db2');
@@ -226,14 +232,14 @@ describe('Pouchdb Session authentication plugin', () => {
         .resolves({
           ok: true,
           status: 200,
-          headers: new Headers({ 'set-cookie': 'AuthSession=user1session; Version=1; Expires=Wed,08-Jan-2025 13:46:26 GMT; Max-Age=31536000; Path=/; HttpOnly' })
+          headers: new Headers({ 'set-cookie': getSession('user1session') })
         });
       fetch
         .withArgs('http://localhost:5984/_session', sinon.match({ body: JSON.stringify({ name: 'usr2', password: 'pass' } ) }))
         .resolves({
           ok: true,
           status: 200,
-          headers: new Headers({ 'set-cookie': 'AuthSession=user2session; Version=1; Expires=Wed,08-Jan-2025 13:46:26 GMT; Max-Age=31536000; Path=/; HttpOnly' })
+          headers: new Headers({ 'set-cookie': getSession('user2session') })
         });
 
       await db1.fetch('http://localhost:5984/db1');
@@ -297,7 +303,7 @@ describe('Pouchdb Session authentication plugin', () => {
       fetch.withArgs('http://admin:pass@localhost:5984/_session').resolves({
         ok: true,
         status: 200,
-        headers: new Headers({ 'set-cookie': 'AuthSession=session1; Version=1; Expires=Wed,08-Jan-2025 13:46:26 GMT; Max-Age=31536000; Path=/; HttpOnly' })
+        headers: new Headers({ 'set-cookie': getSession('session1') })
       });
       await db.fetch('randomUrl1');
 
@@ -322,7 +328,7 @@ describe('Pouchdb Session authentication plugin', () => {
       fetch.resolves({
         ok: true,
         status: 200,
-        headers: new Headers({ 'set-cookie': 'AuthSession=session2; Version=1; Expires=Wed,08-Jan-2025 13:46:26 GMT; Max-Age=31536000; Path=/; HttpOnly' })
+        headers: new Headers({ 'set-cookie': getSession('session2') })
       });
       await db.fetch('randomUrl2');
       expect(fetch.args[2]).to.deep.equal([
@@ -346,12 +352,12 @@ describe('Pouchdb Session authentication plugin', () => {
       fetch.withArgs('http://usr:pass@localhost:5984/_session').onCall(0).resolves({
         ok: true,
         status: 200,
-        headers: new Headers({ 'set-cookie': 'AuthSession=session1; Version=1; Expires=Wed,08-Jan-2025 13:46:26 GMT; Max-Age=31536000; Path=/; HttpOnly' })
+        headers: new Headers({ 'set-cookie': getSession('session1') })
       });
       fetch.withArgs('http://usr:pass@localhost:5984/_session').onCall(1).resolves({
         ok: true,
         status: 200,
-        headers: new Headers({ 'set-cookie': 'AuthSession=session2; Version=1; Expires=Wed,08-Jan-2025 13:46:26 GMT; Max-Age=31536000; Path=/; HttpOnly' })
+        headers: new Headers({ 'set-cookie': getSession('session2') })
       });
       await db.fetch('randomUrl1');
 
@@ -411,12 +417,12 @@ describe('Pouchdb Session authentication plugin', () => {
       fetch.withArgs('http://usr:pass@localhost:5984/_session').onCall(0).resolves({
         ok: true,
         status: 200,
-        headers: new Headers({ 'set-cookie': 'AuthSession=session1; Version=1; Expires=Wed,08-Jan-2024 13:46:26 GMT; Max-Age=31536000; Path=/; HttpOnly' })
+        headers: new Headers({ 'set-cookie': getSession('session1') })
       });
       fetch.withArgs('http://usr:pass@localhost:5984/_session').onCall(1).resolves({
         ok: true,
         status: 200,
-        headers: new Headers({ 'set-cookie': 'AuthSession=session2; Version=1; Expires=Wed,12-Jan-2024 13:46:26 GMT; Max-Age=31536000; Path=/; HttpOnly' })
+        headers: new Headers({ 'set-cookie': getSession('session2') })
       });
       await db.fetch('randomUrl1');
       clock.setSystemTime(new Date('Wed,09-Jan-2024 13:46:26 GMT').valueOf());
@@ -490,9 +496,9 @@ describe('Pouchdb Session authentication plugin', () => {
 
       fetch.resolves({ ok: false, status: 401, body: 'omg' });
       fetch.withArgs('http://localhost:5984/_session').resolves({ ok: false, status: 401, headers: new Headers({
-          'set-cookie': 'othercookie=whatever',
-          'Content-Type': 'application/json',
-        }) });
+        'set-cookie': 'othercookie=whatever',
+        'Content-Type': 'application/json',
+      }) });
       const response = await db.fetch('randomUrl');
 
       expect(response).to.deep.equal({ ok: false, status: 401, body: 'omg' });
