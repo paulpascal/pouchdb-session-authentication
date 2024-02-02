@@ -22,6 +22,11 @@ const parseCookie = (response) => {
   }
 
   const parts = matches[1].split(';').map(item => item.trim().split('='));
+  const token = parts[0][0];
+  if (!token) {
+    return;
+  }
+
   return {
     token: parts[0][0],
     expires: new Date(parts.find(part => part[0] === 'Expires')[1]).valueOf(),
@@ -37,7 +42,7 @@ const getExistingSession = (db) => {
 
 const getSessionKey = (db) => {
   const sessionUrl = getSessionUrl(db);
-  return `${db.credentials.username}:${sessionUrl}`;
+  return `${db.credentials.username}:${db.credentials.password}:${sessionUrl}`;
 };
 
 const getSessionUrl = (db) => {
@@ -49,15 +54,11 @@ const getSessionUrl = (db) => {
 const authenticate = async (db) => {
   const url = getSessionUrl(db);
 
-  const authString = `${db.credentials.username}:${db.credentials.password}`;
-  const token = btoa(decodeURIComponent(encodeURIComponent(authString)));
   const headers = new Headers();
-  headers.set('Authorization', 'Basic ' + token);
   headers.set('Content-Type', 'application/json');
   headers.set('Accept', 'application/json');
 
   const body = JSON.stringify({ name: db.credentials.username, password: db.credentials.password});
-
   const response = await db.originalFetch(url.toString(), { method: 'POST', headers, body });
   updateSession(db, response);
 };
@@ -115,7 +116,7 @@ function wrapAdapter (PouchDB, HttpPouch) {
 
       if (session) {
         opts.headers = opts.headers || new Headers();
-        opts.headers.set(sessionCookieName, session.token);
+        opts.headers.set('Cookie', `${sessionCookieName}=${session.token}`);
       }
 
       const response = await db.originalFetch(url, opts);

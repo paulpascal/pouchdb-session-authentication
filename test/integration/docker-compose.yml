@@ -1,0 +1,10 @@
+version: '3.9'
+
+services:
+  couchdb:
+    image: couchdb:3.3.3
+    environment:
+      - "COUCHDB_USER=${COUCHDB_USER:-admin}"
+      - "COUCHDB_PASSWORD=${COUCHDB_PASSWORD:-pass}"
+    ports:
+      - "15984:5984"

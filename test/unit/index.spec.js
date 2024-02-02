@@ -14,7 +14,7 @@ let db;
 let clock;
 
 const getSession = (string, date) => {
-  date = date || new Date().toString();
+  date = date || new Date(Date.now() + 1000).toString();
   return `AuthSession=${string}; Version=1; Expires=${date}; Max-Age=31536000; Path=/; HttpOnly`;
 };
 
@@ -130,7 +130,6 @@ describe('Pouchdb Session authentication plugin', () => {
         {
           method: 'POST',
           headers: new Headers({
-            'Authorization': `Basic ${btoa(decodeURIComponent(encodeURIComponent('admin:pass')))}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           }),
@@ -139,7 +138,7 @@ describe('Pouchdb Session authentication plugin', () => {
       ]);
       expect(fetch.args[1]).to.deep.equal([
         'randomUrl',
-        { headers: new Headers({ 'AuthSession': 'sess' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=sess' }) }
       ]);
     });
 
@@ -163,7 +162,6 @@ describe('Pouchdb Session authentication plugin', () => {
         {
           method: 'POST',
           headers: new Headers({
-            'Authorization': `Basic ${btoa(decodeURIComponent(encodeURIComponent('admin:pass')))}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           }),
@@ -172,11 +170,11 @@ describe('Pouchdb Session authentication plugin', () => {
       ]);
       expect(fetch.args[1]).to.deep.equal([
         'randomUrl1',
-        { headers: new Headers({ 'AuthSession': 'session1' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=session1' }) }
       ]);
       expect(fetch.args[2]).to.deep.equal([
         'randomUrl2',
-        { headers: new Headers({ 'AuthSession': 'session1' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=session1' }) }
       ]);
     });
 
@@ -202,7 +200,6 @@ describe('Pouchdb Session authentication plugin', () => {
         {
           method: 'POST',
           headers: new Headers({
-            'Authorization': `Basic ${btoa(decodeURIComponent(encodeURIComponent('admin:pass')))}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           }),
@@ -211,11 +208,11 @@ describe('Pouchdb Session authentication plugin', () => {
       ]);
       expect(fetch.args[1]).to.deep.equal([
         'http://localhost:5984/db1',
-        { headers: new Headers({ 'AuthSession': 'session1' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=session1' }) }
       ]);
       expect(fetch.args[2]).to.deep.equal([
         'http://localhost:5984/db2',
-        { headers: new Headers({ 'AuthSession': 'session1' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=session1' }) }
       ]);
     });
     
@@ -251,7 +248,6 @@ describe('Pouchdb Session authentication plugin', () => {
         {
           method: 'POST',
           headers: new Headers({
-            'Authorization': `Basic ${btoa(decodeURIComponent(encodeURIComponent('usr1:pass')))}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           }),
@@ -260,14 +256,13 @@ describe('Pouchdb Session authentication plugin', () => {
       ]);
       expect(fetch.args[1]).to.deep.equal([
         'http://localhost:5984/db1',
-        { headers: new Headers({ 'AuthSession': 'user1session' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=user1session' }) }
       ]);
       expect(fetch.args[2]).to.deep.equal([
         'http://localhost:5984/_session',
         {
           method: 'POST',
           headers: new Headers({
-            'Authorization': `Basic ${btoa(decodeURIComponent(encodeURIComponent('usr2:pass')))}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           }),
@@ -276,7 +271,7 @@ describe('Pouchdb Session authentication plugin', () => {
       ]);
       expect(fetch.args[3]).to.deep.equal([
         'http://localhost:5984/db2',
-        { headers: new Headers({ 'AuthSession': 'user2session' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=user2session' }) }
       ]);
 
       await db1.fetch('http://localhost:5984/db1/_all_docs');
@@ -286,11 +281,11 @@ describe('Pouchdb Session authentication plugin', () => {
 
       expect(fetch.args[4]).to.deep.equal([
         'http://localhost:5984/db1/_all_docs',
-        { headers: new Headers({ 'AuthSession': 'user1session' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=user1session' }) }
       ]);
       expect(fetch.args[5]).to.deep.equal([
         'http://localhost:5984/db2/_all_docs',
-        { headers: new Headers({ 'AuthSession': 'user2session' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=user2session' }) }
       ]);
     });
     
@@ -313,7 +308,6 @@ describe('Pouchdb Session authentication plugin', () => {
         {
           method: 'POST',
           headers: new Headers({
-            'Authorization': `Basic ${btoa(decodeURIComponent(encodeURIComponent('admin:pass')))}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           }),
@@ -322,7 +316,7 @@ describe('Pouchdb Session authentication plugin', () => {
       ]);
       expect(fetch.args[1]).to.deep.equal([
         'randomUrl1',
-        { headers: new Headers({ 'AuthSession': 'session1' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=session1' }) }
       ]);
 
       fetch.resolves({
@@ -333,13 +327,13 @@ describe('Pouchdb Session authentication plugin', () => {
       await db.fetch('randomUrl2');
       expect(fetch.args[2]).to.deep.equal([
         'randomUrl2',
-        { headers: new Headers({ 'AuthSession': 'session1' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=session1' }) }
       ]);
 
       await db.fetch('randomUrl3');
       expect(fetch.args[3]).to.deep.equal([
         'randomUrl3',
-        { headers: new Headers({ 'AuthSession': 'session2' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=session2' }) }
       ]);
     }); 
     
@@ -367,7 +361,6 @@ describe('Pouchdb Session authentication plugin', () => {
         {
           method: 'POST',
           headers: new Headers({
-            'Authorization': `Basic ${btoa(decodeURIComponent(encodeURIComponent('usr:pass')))}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           }),
@@ -376,7 +369,7 @@ describe('Pouchdb Session authentication plugin', () => {
       ]);
       expect(fetch.args[1]).to.deep.equal([
         'randomUrl1',
-        { headers: new Headers({ 'AuthSession': 'session1' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=session1' }) }
       ]);
 
       fetch.onCall(2).resolves({
@@ -391,7 +384,6 @@ describe('Pouchdb Session authentication plugin', () => {
         {
           method: 'POST',
           headers: new Headers({
-            'Authorization': `Basic ${btoa(decodeURIComponent(encodeURIComponent('usr:pass')))}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           }),
@@ -400,7 +392,7 @@ describe('Pouchdb Session authentication plugin', () => {
       ]);
       expect(fetch.args[4]).to.deep.equal([
         'randomUrl2',
-        { headers: new Headers({ 'AuthSession': 'session2' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=session2' }) }
       ]);
     }); 
 
@@ -419,13 +411,13 @@ describe('Pouchdb Session authentication plugin', () => {
         status: 200,
         headers: new Headers({ 'set-cookie': getSession('session1') })
       });
+      await db.fetch('randomUrl1');
+      clock.setSystemTime(new Date('Wed,09-Jan-2024 13:46:26 GMT').valueOf());
       fetch.withArgs('http://usr:pass@localhost:5984/_session').onCall(1).resolves({
         ok: true,
         status: 200,
         headers: new Headers({ 'set-cookie': getSession('session2') })
       });
-      await db.fetch('randomUrl1');
-      clock.setSystemTime(new Date('Wed,09-Jan-2024 13:46:26 GMT').valueOf());
       await db.fetch('randomUrl2');
 
       expect(fetch.args[0]).to.deep.equal([
@@ -433,7 +425,6 @@ describe('Pouchdb Session authentication plugin', () => {
         {
           method: 'POST',
           headers: new Headers({
-            'Authorization': `Basic ${btoa(decodeURIComponent(encodeURIComponent('usr:pass')))}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           }),
@@ -442,7 +433,7 @@ describe('Pouchdb Session authentication plugin', () => {
       ]);
       expect(fetch.args[1]).to.deep.equal([
         'randomUrl1',
-        { headers: new Headers({ 'AuthSession': 'session1' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=session1' }) }
       ]);
 
       expect(fetch.args[2]).to.deep.equal([
@@ -450,7 +441,6 @@ describe('Pouchdb Session authentication plugin', () => {
         {
           method: 'POST',
           headers: new Headers({
-            'Authorization': `Basic ${btoa(decodeURIComponent(encodeURIComponent('usr:pass')))}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           }),
@@ -459,7 +449,7 @@ describe('Pouchdb Session authentication plugin', () => {
       ]);
       expect(fetch.args[3]).to.deep.equal([
         'randomUrl2',
-        { headers: new Headers({ 'AuthSession': 'session2' }) }
+        { headers: new Headers({ 'Cookie': 'AuthSession=session2' }) }
       ]);
     });
 
@@ -479,7 +469,6 @@ describe('Pouchdb Session authentication plugin', () => {
         {
           method: 'POST',
           headers: new Headers({
-            'Authorization': `Basic ${btoa(decodeURIComponent(encodeURIComponent('admin:pass')))}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           }),
@@ -489,7 +478,7 @@ describe('Pouchdb Session authentication plugin', () => {
       expect(fetch.args[1]).to.deep.equal([ 'randomUrl', {} ]);
     });
 
-    it('should continue when seesion cookie is not returned', async () => {
+    it('should continue when session cookie is not returned', async () => {
       db = { name: 'http://localhost:5984/db_name', auth: { username: 'admin', password: 'pass' }};
       plugin(PoudhDb);
       PoudhDb.adapters.http(db);
@@ -508,7 +497,34 @@ describe('Pouchdb Session authentication plugin', () => {
         {
           method: 'POST',
           headers: new Headers({
-            'Authorization': `Basic ${btoa(decodeURIComponent(encodeURIComponent('admin:pass')))}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          }),
+          body: JSON.stringify({ name: 'admin', password: 'pass' }),
+        }
+      ]);
+      expect(fetch.args[1]).to.deep.equal([ 'randomUrl', {} ]);
+    });
+
+    it('should continue when session cookie is empty', async () => {
+      db = { name: 'http://localhost:5984/db_name', auth: { username: 'admin', password: 'pass' }};
+      plugin(PoudhDb);
+      PoudhDb.adapters.http(db);
+
+      fetch.resolves({ ok: false, status: 401, body: 'omg' });
+      fetch.withArgs('http://localhost:5984/_session').resolves({ ok: false, status: 401, headers: new Headers({
+        'set-cookie': getSession(''),
+        'Content-Type': 'application/json',
+      }) });
+      const response = await db.fetch('randomUrl');
+
+      expect(response).to.deep.equal({ ok: false, status: 401, body: 'omg' });
+      expect(fetch.callCount).to.equal(2);
+      expect(fetch.args[0]).to.deep.equal([
+        'http://localhost:5984/_session',
+        {
+          method: 'POST',
+          headers: new Headers({
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           }),

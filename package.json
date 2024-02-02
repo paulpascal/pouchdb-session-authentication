@@ -6,7 +6,12 @@
   "scripts": {
     "unit": "nyc mocha ./test/unit/*.js",
     "lint": "eslint .",
-    "test": "npm run lint && npm run unit"
+    "test": "npm run lint && npm run unit",
+    "start-couch": "cd test/integration && docker-compose up -d",
+    "stop-couch": "cd test/integration && docker-compose down --remove-orphans",
+    "integration-auth": "npm run stop-couch && npm run start-couch && mocha ./test/integration/*.spec.js && npm run stop-couch",
+    "integration-url": "npm run stop-couch && npm run start-couch && AUTH_TYPE=url mocha ./test/integration/*.spec.js && npm run stop-couch",
+    "integration": "npm run integration-auth && npm run integration-url"
   },
   "engines": {
     "node": ">=16.12.0",
@@ -20,11 +25,15 @@
   "devDependencies": {
     "@medic/eslint-config": "^1.1.0",
     "chai": "^4.4.1",
+    "chai-as-promised": "^7.1.1",
     "eslint": "^8.56.0",
     "eslint-plugin-node": "^11.1.0",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
+    "pouchdb-adapter-http": "^8.0.1",
+    "pouchdb-core": "^8.0.1",
     "rewire": "^7.0.0",
-    "sinon": "^17.0.1"
+    "sinon": "^17.0.1",
+    "uuid": "^9.0.1"
   }
 }
