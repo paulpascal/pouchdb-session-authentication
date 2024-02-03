@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const { spawn } = require('child_process');
+const path = require('path');
 
 const baseUrl = 'http://localhost:15984';
 const auth = {
@@ -25,7 +26,7 @@ const waitForDockerContainerLogs = (...regex) => {
     params.split(' '),
     {
       stdio: ['ignore', 'pipe', 'pipe'],
-      cwd: __dirname
+      cwd: path.join(process.cwd(), 'test', 'integration'),
     }
   );
   let timeout;
