@@ -64,7 +64,7 @@ const waitForDockerContainerLogs = (...regex) => {
 };
 
 const getDockerContainerLogs = (...regex) => {
-  const params = 'logs couchdb -f -n=1';
+  const params = 'logs -f -n=1 couchdb';
   const proc = spawn(
     'docker-compose',
     params.split(' '),
