@@ -19,7 +19,7 @@ const killSpawnedProcess = (proc) => {
 };
 
 const waitForDockerContainerLogs = (...regex) => {
-  const params = 'logs couchdb --follow --tail=1';
+  const params = 'logs couchdb -f -n=1';
   const proc = spawn(
     'docker-compose',
     params.split(' '),
@@ -63,7 +63,7 @@ const waitForDockerContainerLogs = (...regex) => {
 };
 
 const getDockerContainerLogs = (...regex) => {
-  const params = 'logs couchdb --follow --tail=1';
+  const params = 'logs couchdb -f -n=1';
   const proc = spawn(
     'docker-compose',
     params.split(' '),
