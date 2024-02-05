@@ -34,11 +34,11 @@ CouchDb security configuration allows for setting the number of password hashing
 
 This plugin generates and stores a session cookie for pairs of user + CouchDb server instance and appends a Cookie header to all outgoing requests. 
 
-Integration should be seamless, the only requirement is adding the plugin _after_ the `pouchdb-adapter-http`, with no additional action should be necessary on the developer's part.
+Integration should be seamless, the only requirement is adding the plugin _after_ the `pouchdb-adapter-http`, with no additional necessary on the developer's part.
 
-It supports authentication embedded in the CouchDb URL or as an additional options field when declaring the database. 
+It supports authentication embedded in the CouchDb URL or as an additional option field when declaring the database. 
 
-It regenerates the session cookie on expiry and retries the last issued request, the client should not expect a failed request for an expired cookie
+It regenerates the session cookie on expiry and retries the last request, the client should not expect a failed request for an expired cookie.
 
 ### Testing
 
