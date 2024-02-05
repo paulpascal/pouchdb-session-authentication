@@ -4,7 +4,7 @@ Enables session cookie authentication for `pouchdb-adapter-http`.
 
 ### Installation
 ```bash
-npm install pouchdb-adapter-http-sessio
+npm install pouchdb-adapter-http-session
 ```
 
 ### Usage
