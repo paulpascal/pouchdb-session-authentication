@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const { fetch, Headers } = require('pouchdb-fetch');
 const { spawn } = require('child_process');
 const path = require('path');
 
@@ -140,7 +140,7 @@ const request = async (opts) => {
   const authString = `${auth.username}:${auth.password}`;
   const token = btoa(decodeURIComponent(encodeURIComponent(authString)));
 
-  const headers = new fetch.Headers({ 'Authorization': 'Basic ' + token });
+  const headers = new Headers({ 'Authorization': 'Basic ' + token });
   if (opts.json) {
     headers.set('Content-Type', 'application/json');
     headers.set('Accept', 'application/json');

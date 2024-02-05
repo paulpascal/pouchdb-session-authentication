@@ -1,5 +1,5 @@
 const util = require('node:util');
-const { Headers } = require('node-fetch');
+const { Headers } = require('pouchdb-fetch');
 
 const sessionCookieName = 'AuthSession';
 const cookieRegex = new RegExp(`${sessionCookieName}=(.*)`);

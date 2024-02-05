@@ -20,7 +20,7 @@
   "author": "Diana Barsan",
   "license": "AGPL-3.0-only",
   "dependencies": {
-    "node-fetch": "^2.7.0"
+    "pouchdb-fetch": "^8.0.1"
   },
   "devDependencies": {
     "@medic/eslint-config": "^1.1.0",

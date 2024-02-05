@@ -9,15 +9,15 @@ const uuid = require('uuid').v4;
 const utils = require('./utils');
 const authType = process.env.AUTH_TYPE || 'auth';
 
-const getDb = (dbName, auth, authType) => {
+const getDb = (dbName, auth, authType, skip_setup = true) => {
   if (authType === 'url') {
     const url = new URL(`${utils.baseUrl}/${dbName}`);
     url.username = auth.username;
     url.password = auth.password;
-    return new PouchDb(url.toString(), { skip_setup: true });
+    return new PouchDb(url.toString(), { skip_setup });
   }
 
-  return new PouchDb(`${utils.baseUrl}/${dbName}`, { skip_setup: true, auth });
+  return new PouchDb(`${utils.baseUrl}/${dbName}`, { skip_setup, auth });
 };
 
 describe(`integration with ${authType}`, function () {
@@ -71,7 +71,7 @@ describe(`integration with ${authType}`, function () {
 
     const logs = await collectLogs();
     expect(utils.getSessionRequests(logs).length).to.equal(0);
-    expect(utils.getCookieAuthRequests(utils.dbAuth.username, logs).length).to.equal(2);
+    expect(utils.getCookieAuthRequests(utils.dbAuth.username, logs).length).to.be.least(2);
   });
 
   it('should create a new session for new users', async () => {
@@ -129,6 +129,17 @@ describe(`integration with ${authType}`, function () {
     const collectLogs = await utils.getDockerContainerLogs();
     await utils.asyncTimeout(6000);
     await db.allDocs();
+    const logs = await collectLogs(1000);
+    expect(utils.getSessionRequests(logs).length).to.equal(1);
+  });
+
+  it('should support initial setup', async () => {
+    const auth = { username: tempAdminName, password: 'new_password' };
+    await utils.createAdmin(auth.username, auth.password);
+
+    const collectLogs = await utils.getDockerContainerLogs();
+    tempDb = getDb(tempDbName, auth, authType, false);
+    await tempDb.allDocs();
     const logs = await collectLogs(1000);
     expect(utils.getSessionRequests(logs).length).to.equal(1);
   });

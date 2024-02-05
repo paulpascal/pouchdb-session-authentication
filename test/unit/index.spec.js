@@ -2,7 +2,7 @@ const rewire = require('rewire');
 const sinon = require('sinon');
 const { expect } = require('chai');
 const chai = require('chai');
-const { Headers } = require('node-fetch');
+const { Headers } = require('pouchdb-fetch');
 chai.config.truncateThreshold = 0; // disable truncating
 
 let plugin;
@@ -25,6 +25,7 @@ describe('Pouchdb Session authentication plugin', () => {
     httpsAdapter = sinon.stub();
     httpAdapter = sinon.stub();
     fetch = sinon.stub();
+    fetch.Headers = Headers;
     PoudhDb = {
       fetch,
       adapters: {
