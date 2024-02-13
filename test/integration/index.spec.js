@@ -143,5 +143,24 @@ describe(`integration with ${authType}`, function () {
     const logs = await collectLogs(1000);
     expect(utils.getSessionRequests(logs).length).to.equal(1);
   });
+
+  it('should only request session once for concurrent requests', async () => {
+    const auth = { username: tempAdminName, password: 'new_password' };
+    await utils.createAdmin(auth.username, auth.password);
+    await utils.createDb(tempDbName);
+
+    tempDb = getDb(tempDbName, auth, authType);
+    const collectLogs = await utils.getDockerContainerLogs();
+    await Promise.all([
+      tempDb.allDocs(),
+      tempDb.allDocs(),
+      tempDb.allDocs(),
+      tempDb.allDocs(),
+      tempDb.allDocs(),
+    ]);
+
+    const logs = await collectLogs();
+    expect(utils.getSessionRequests(logs).length).to.equal(1);
+  });
 });
 

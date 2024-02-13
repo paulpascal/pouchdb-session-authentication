@@ -33,13 +33,6 @@ const parseCookie = (response) => {
   };
 };
 
-const getExistingSession = (db) => {
-  const urlString = getSessionKey(db);
-  if (sessions[urlString] && !isExpired(sessions[urlString])) {
-    return sessions[urlString];
-  }
-};
-
 const getSessionKey = (db) => {
   const sessionUrl = getSessionUrl(db);
   return `${db.credentials.username}:${db.credentials.password}:${sessionUrl}`;
@@ -60,24 +53,21 @@ const authenticate = async (db) => {
 
   const body = JSON.stringify({ name: db.credentials.username, password: db.credentials.password});
   const response = await db.originalFetch(url.toString(), { method: 'POST', headers, body });
-  updateSession(db, response);
+  return updateSession(db, response);
 };
 
 const updateSession = (db, response) => {
   const session = parseCookie(response);
   if (session) {
-    const url = getSessionKey(db);
-    sessions[url] = session;
+    const sessionKey = getSessionKey(db);
+    sessions[sessionKey] = session;
+    return session;
   }
 };
 
 const invalidateSession = db => {
-  const url = getSessionKey(db);
-  delete sessions[url];
-};
-
-const isExpired = (session) => {
-  return Date.now() > session.expires;
+  const sessionKey = getSessionKey(db);
+  delete sessions[sessionKey];
 };
 
 const extractAuth = (opts) => {
@@ -96,6 +86,28 @@ const extractAuth = (opts) => {
   };
 };
 
+const isValid = (session) => {
+  if (!session || !session.expires) {
+    return false;
+  }
+  const isExpired =  Date.now() > session.expires;
+  return !isExpired;
+};
+
+const getValidSession = async (db) => {
+  const sessionKey = getSessionKey(db);
+
+  if (sessions[sessionKey]) {
+    const session = await sessions[sessionKey];
+    if (isValid(session)) {
+      return session;
+    }
+  }
+
+  sessions[sessionKey] = authenticate(db);
+  return sessions[sessionKey];
+};
+
 // eslint-disable-next-line func-style
 function wrapAdapter (PouchDB, HttpPouch) {
   // eslint-disable-next-line func-style
@@ -108,11 +120,7 @@ function wrapAdapter (PouchDB, HttpPouch) {
 
     db.originalFetch = db.fetch || PouchDB.fetch;
     db.fetch = async (url, opts = {}) => {
-      let session = getExistingSession(db);
-      if (!session) {
-        await authenticate(db);
-        session = getExistingSession(db);
-      }
+      const session = await getValidSession(db);
 
       if (session) {
         opts.headers = opts.headers || new Headers();
