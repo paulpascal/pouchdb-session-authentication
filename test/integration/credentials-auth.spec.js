@@ -28,7 +28,7 @@ describe(`integration with ${authType}`, async function () {
   let tempAdminName;
   let tempDb;
 
-  const wrongAuthError = authType === 'url' ? 'Name or password is incorrect.' : 'Authentication required.';
+  const wrongAuthError = 'Authentication required.';
 
   this.timeout(12000);
   before(async () => {
