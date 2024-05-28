@@ -300,6 +300,44 @@ describe('Pouchdb Session authentication plugin', () => {
       ]);
     });
 
+    it('should allow for different sessions per server', async () => {
+      const db1 = { name: 'http://localhost:5984/db1', session: 'session1'};
+      const db2 = { name: 'http://localhost:5984/db2', session: 'session2' };
+      plugin(PouchDb);
+      PouchDb.adapters.http(db1);
+      PouchDb.adapters.http(db2);
+
+      fetch.resolves({ ok: true, status: 200 });
+
+      await db1.fetch('http://localhost:5984/db1');
+      await db2.fetch('http://localhost:5984/db2');
+
+      expect(fetch.callCount).to.equal(2);
+      expect(fetch.args[0]).to.deep.equal([
+        'http://localhost:5984/db1',
+        { headers: new Headers({ 'Cookie': 'AuthSession=session1' }) }
+      ]);
+
+      expect(fetch.args[1]).to.deep.equal([
+        'http://localhost:5984/db2',
+        { headers: new Headers({ 'Cookie': 'AuthSession=session2' }) }
+      ]);
+
+      await db1.fetch('http://localhost:5984/db1/_all_docs');
+      await db2.fetch('http://localhost:5984/db2/_all_docs');
+
+      expect(fetch.callCount).to.equal(4);
+
+      expect(fetch.args[2]).to.deep.equal([
+        'http://localhost:5984/db1/_all_docs',
+        { headers: new Headers({ 'Cookie': 'AuthSession=session1' }) }
+      ]);
+      expect(fetch.args[3]).to.deep.equal([
+        'http://localhost:5984/db2/_all_docs',
+        { headers: new Headers({ 'Cookie': 'AuthSession=session2' }) }
+      ]);
+    });
+
     it('should only request session once for concurrent requests', async () => {
       db = { name: 'http://admin:pass@localhost:5984/mydb' };
       plugin(PouchDb);
