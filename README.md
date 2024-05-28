@@ -18,9 +18,11 @@ const myOtherDb = new PouchDB(
   'http://mysite:5984/mydb', 
   { auth: { username: 'admin', password: 'pass' } 
 });
+const sessionDb = new PouchDB('http://mysite:5984/mydb', { session: 'existent session cookie' });
 
 await myDb.allDocs();
 await myOtherDb.allDocs();
+await sessionDb.allDocs();
 ```
 
 ## Overview
@@ -39,6 +41,8 @@ Integration should be seamless, the only requirement is adding the plugin _after
 It supports authentication embedded in the CouchDb URL or as an additional option field when declaring the database. 
 
 It regenerates the session cookie on expiry and retries the last request, the client should not expect a failed request for an expired cookie.
+
+When given a `session` parameter, a new session will not be requested, instead the passed session cookie will be used as session authentication. 
 
 ### Testing
 
