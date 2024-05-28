@@ -169,7 +169,7 @@ const setConfig = async (section, config, value, remove = false) => {
 };
 
 const setIterations = (iterations) => setConfig('chttpd_auth', 'iterations', iterations);
-const setAuthTimeout = (timeout) => setConfig('couch_httpd_auth', 'timeout', timeout);
+const setAuthTimeout = (timeout) => setConfig('chttpd_auth', 'timeout', timeout);
 
 const waitForCouchdb = async () => {
   // eslint-disable-next-line no-constant-condition
@@ -227,7 +227,7 @@ const setupCouch = async (dbName) => {
   await createAdmin(dbAuth.username, dbAuth.password);
 
   await setIterations('50000');
-  await setAuthTimeout('5');
+  await setAuthTimeout('4');
   await setConfig('log', 'level', 'debug');
   await setConfig('chttpd', 'require_valid_user', 'true');
   await createDb(dbName);

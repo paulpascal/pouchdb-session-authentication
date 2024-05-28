@@ -9,9 +9,9 @@
     "test": "npm run lint && npm run unit",
     "start-couch": "cd test/integration && docker-compose up -d",
     "stop-couch": "cd test/integration && docker-compose down --remove-orphans",
-    "integration-auth": "npm run stop-couch && npm run start-couch && mocha ./test/integration/*.spec.js --grep=#nosession && npm run stop-couch",
-    "integration-url": "npm run stop-couch && npm run start-couch && AUTH_TYPE=url mocha ./test/integration/*.spec.js --grep=#nosession && npm run stop-couch",
-    "integration-session": "npm run stop-couch && npm run start-couch && AUTH_TYPE=session mocha ./test/integration/*.spec.js --grep=#nosession --invert && npm run stop-couch",
+    "integration-auth": "npm run stop-couch && npm run start-couch && mocha ./test/integration/credentials*.spec.js && npm run stop-couch",
+    "integration-url": "npm run stop-couch && npm run start-couch && AUTH_TYPE=url mocha ./test/integration/credentials*.spec.js && npm run stop-couch",
+    "integration-session": "npm run stop-couch && npm run start-couch && AUTH_TYPE=session mocha ./test/integration/session*.spec.js && npm run stop-couch",
     "integration": "npm run integration-auth && npm run integration-url && npm run integration-session"
   },
   "engines": {

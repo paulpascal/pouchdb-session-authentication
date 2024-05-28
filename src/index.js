@@ -1,6 +1,5 @@
 const util = require('node:util');
 const { Headers } = require('pouchdb-fetch');
-const oneYearInMs = 31557600000;
 
 const sessionCookieName = 'AuthSession';
 const cookieRegex = new RegExp(`${sessionCookieName}=(.*)`);
@@ -36,7 +35,7 @@ const parseCookie = (response) => {
 
 const getSessionKey = (db) => {
   const sessionUrl = getSessionUrl(db);
-  return `${db.credentials?.username}:${db.credentials?.password}:${sessionUrl}`;
+  return `${db.credentials?.username}:${db.credentials?.password}:${db.session}:${sessionUrl}`;
 };
 
 const getSessionUrl = (db) => {
@@ -52,7 +51,7 @@ const authenticate = async (db) => {
   headers.set('Content-Type', 'application/json');
   headers.set('Accept', 'application/json');
 
-  const body = JSON.stringify({ name: db.credentials.username, password: db.credentials.password});
+  const body = JSON.stringify({ name: db.credentials?.username, password: db.credentials?.password});
   const response = await db.originalFetch(url.toString(), { method: 'POST', headers, body });
   return updateSession(db, response);
 };
@@ -78,20 +77,22 @@ const invalidateSession = db => {
 const extractAuth = (opts) => {
   if (opts.auth) {
     opts.credentials = opts.auth;
+    delete opts.auth;
   }
 
   const url = new URL(opts.name);
-  if (!url.username && !opts.session) {
-    return;
+  if (url.username) {
+    opts.credentials = {
+      username: url.username,
+      password: url.password
+    };
+    url.username = '';
+    url.password = '';
+    opts.name = url.toString();
   }
 
-  opts.credentials = {
-    username: url.username,
-    password: url.password
-  };
-
   if (opts.session) {
-    setSession(opts, { token: opts.session, expires: Date.now() + oneYearInMs });
+    setSession(opts, { token: opts.session, expires: Number.MAX_SAFE_INTEGER });
   }
 };
 

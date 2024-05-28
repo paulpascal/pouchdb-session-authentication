@@ -72,7 +72,7 @@ describe('Pouchdb Session authentication plugin', () => {
       PouchDb.adapters.http(db);
 
       expect(db.fetch).to.not.equal(fetch);
-      expect(db.name).to.equal('http://admin:pass@localhost:5984/dbname');
+      expect(db.name).to.equal('http://localhost:5984/dbname');
       expect(db.credentials).to.deep.equal({ username: 'admin', password: 'pass' });
       expect(db.auth).to.equal(undefined);
     });
@@ -85,7 +85,7 @@ describe('Pouchdb Session authentication plugin', () => {
       expect(db.fetch).to.not.equal(fetch);
       expect(db.name).to.equal('http://localhost:5984/name');
       expect(db.credentials).to.deep.equal({ username: 'admin', password: 'pass' });
-      expect(db.auth).to.deep.equal({ username: 'admin', password: 'pass' });
+      expect(db.auth).to.deep.equal(undefined);
     });
 
     it('should extract session auth', () => {
@@ -95,7 +95,7 @@ describe('Pouchdb Session authentication plugin', () => {
 
       expect(db.fetch).to.not.equal(fetch);
       expect(db.name).to.equal('http://localhost:5984/name');
-      expect(db.credentials).to.deep.equal({ username: '', password: '' });
+      expect(db.credentials).to.deep.equal(undefined);
     });
   });
 
@@ -306,7 +306,7 @@ describe('Pouchdb Session authentication plugin', () => {
       PouchDb.adapters.http(db);
 
       fetch.resolves({ ok: true, status: 200 });
-      fetch.withArgs('http://admin:pass@localhost:5984/_session').resolves({
+      fetch.withArgs('http://localhost:5984/_session').resolves({
         ok: true,
         status: 200,
         headers: new Headers({ 'set-cookie': getSession('theonetruesession') })
@@ -321,7 +321,7 @@ describe('Pouchdb Session authentication plugin', () => {
 
       expect(fetch.callCount).to.equal(5);
       expect(fetch.args[0]).to.deep.equal([
-        'http://admin:pass@localhost:5984/_session',
+        'http://localhost:5984/_session',
         {
           method: 'POST',
           headers: new Headers({
@@ -355,7 +355,7 @@ describe('Pouchdb Session authentication plugin', () => {
       PouchDb.adapters.http(db);
 
       fetch.resolves({ ok: true, status: 200 });
-      fetch.withArgs('http://admin:pass@localhost:5984/_session').resolves({
+      fetch.withArgs('http://localhost:5984/_session').resolves({
         ok: true,
         status: 200,
         headers: new Headers({ 'set-cookie': getSession('session1') })
@@ -364,7 +364,7 @@ describe('Pouchdb Session authentication plugin', () => {
 
       expect(fetch.callCount).to.equal(2);
       expect(fetch.args[0]).to.deep.equal([
-        'http://admin:pass@localhost:5984/_session',
+        'http://localhost:5984/_session',
         {
           method: 'POST',
           headers: new Headers({
@@ -403,12 +403,12 @@ describe('Pouchdb Session authentication plugin', () => {
       PouchDb.adapters.http(db);
 
       fetch.resolves({ ok: true, status: 200 });
-      fetch.withArgs('http://usr:pass@localhost:5984/_session').onCall(0).resolves({
+      fetch.withArgs('http://localhost:5984/_session').onCall(0).resolves({
         ok: true,
         status: 200,
         headers: new Headers({ 'set-cookie': getSession('session1') })
       });
-      fetch.withArgs('http://usr:pass@localhost:5984/_session').onCall(1).resolves({
+      fetch.withArgs('http://localhost:5984/_session').onCall(1).resolves({
         ok: true,
         status: 200,
         headers: new Headers({ 'set-cookie': getSession('session2') })
@@ -417,7 +417,7 @@ describe('Pouchdb Session authentication plugin', () => {
 
       expect(fetch.callCount).to.equal(2);
       expect(fetch.args[0]).to.deep.equal([
-        'http://usr:pass@localhost:5984/_session',
+        'http://localhost:5984/_session',
         {
           method: 'POST',
           headers: new Headers({
@@ -440,7 +440,7 @@ describe('Pouchdb Session authentication plugin', () => {
       await db.fetch('randomUrl2');
 
       expect(fetch.args[3]).to.deep.equal([
-        'http://usr:pass@localhost:5984/_session',
+        'http://localhost:5984/_session',
         {
           method: 'POST',
           headers: new Headers({
@@ -466,14 +466,14 @@ describe('Pouchdb Session authentication plugin', () => {
       PouchDb.adapters.http(db);
 
       fetch.resolves({ ok: true, status: 200 });
-      fetch.withArgs('http://usr:pass@localhost:5984/_session').onCall(0).resolves({
+      fetch.withArgs('http://localhost:5984/_session').onCall(0).resolves({
         ok: true,
         status: 200,
         headers: new Headers({ 'set-cookie': getSession('session1') })
       });
       await db.fetch('randomUrl1');
       clock.setSystemTime(new Date('Wed,09-Jan-2024 13:46:26 GMT').valueOf());
-      fetch.withArgs('http://usr:pass@localhost:5984/_session').onCall(1).resolves({
+      fetch.withArgs('http://localhost:5984/_session').onCall(1).resolves({
         ok: true,
         status: 200,
         headers: new Headers({ 'set-cookie': getSession('session2') })
@@ -481,7 +481,7 @@ describe('Pouchdb Session authentication plugin', () => {
       await db.fetch('randomUrl2');
 
       expect(fetch.args[0]).to.deep.equal([
-        'http://usr:pass@localhost:5984/_session',
+        'http://localhost:5984/_session',
         {
           method: 'POST',
           headers: new Headers({
@@ -497,7 +497,7 @@ describe('Pouchdb Session authentication plugin', () => {
       ]);
 
       expect(fetch.args[2]).to.deep.equal([
-        'http://usr:pass@localhost:5984/_session',
+        'http://localhost:5984/_session',
         {
           method: 'POST',
           headers: new Headers({
