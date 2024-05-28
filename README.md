@@ -42,7 +42,7 @@ It supports authentication embedded in the CouchDb URL or as an additional optio
 
 It regenerates the session cookie on expiry and retries the last request, the client should not expect a failed request for an expired cookie.
 
-When given a `session` parameter, a new session will not be requested, instead the passed session cookie will be used as session authentication. 
+When given a `session` parameter, a new session will not be requested, instead the passed session cookie will be used as session authentication. If both `session` and `auth` are provided then the `auth` will only be used if the session token has expired.
 
 ### Testing
 
