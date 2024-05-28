@@ -145,7 +145,7 @@ describe(`integration with ${authType}`, async function () {
     });
 
     it('should throw errors on invalid credentials', async () => {
-      const newDb = await getDb(dbName, { username: utils.dbAuth.username, password: 'not the right password' }, authType);
+      const newDb = await getDb(dbName, { username: utils.dbAuth.username, password: 'wrong password' }, authType);
 
       const collectLogs = await utils.getDockerContainerLogs();
       await expect(newDb.allDocs()).to.eventually.be.rejectedWith('Name or password is incorrect.');
@@ -199,7 +199,7 @@ describe(`integration with ${authType}`, async function () {
     });
   });
 
-  describe ('#session auth type', () => {
+  describe('#session auth type', () => {
     it('should use existent session when connecting to any DB', async () => {
       await utils.createDb(tempDbName);
       tempDb = await getDb(tempDbName, utils.dbAuth, authType);
@@ -222,7 +222,9 @@ describe(`integration with ${authType}`, async function () {
       tempDb = new PouchDb(url.toString(), { skip_setup: true, session: 'invalid' });
 
       const collectLogs = await utils.getDockerContainerLogs();
-      await expect(tempDb.allDocs()).to.eventually.be.rejectedWith('Malformed AuthSession cookie. Please clear your cookies.');
+      await expect(tempDb.allDocs()).to.eventually.be.rejectedWith(
+        'Malformed AuthSession cookie. Please clear your cookies.'
+      );
       const logs = await collectLogs();
 
       expect(utils.getSessionRequests(logs).length).to.equal(0);
@@ -283,6 +285,6 @@ describe(`integration with ${authType}`, async function () {
 
       expect(utils.getSessionRequests(logs, false).length).to.equal(1);
     });
-  })
+  });
 });
 

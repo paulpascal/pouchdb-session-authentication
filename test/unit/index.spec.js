@@ -95,7 +95,7 @@ describe('Pouchdb Session authentication plugin', () => {
 
       expect(db.fetch).to.not.equal(fetch);
       expect(db.name).to.equal('http://localhost:5984/name');
-      expect(db.credentials).to.deep.equal(undefined);
+      expect(db.credentials).to.deep.equal({ username: '', password: '' });
     });
   });
 
