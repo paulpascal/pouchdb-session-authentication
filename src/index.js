@@ -1,5 +1,6 @@
 const util = require('node:util');
 const { Headers } = require('pouchdb-fetch');
+const oneYearInMs = 31557600000;
 
 const sessionCookieName = 'AuthSession';
 const cookieRegex = new RegExp(`${sessionCookieName}=(.*)`);
@@ -35,7 +36,7 @@ const parseCookie = (response) => {
 
 const getSessionKey = (db) => {
   const sessionUrl = getSessionUrl(db);
-  return `${db.credentials.username}:${db.credentials.password}:${sessionUrl}`;
+  return `${db.credentials?.username}:${db.credentials?.password}:${sessionUrl}`;
 };
 
 const getSessionUrl = (db) => {
@@ -56,13 +57,17 @@ const authenticate = async (db) => {
   return updateSession(db, response);
 };
 
-const updateSession = (db, response) => {
-  const session = parseCookie(response);
+const setSession = (db, session) => {
   if (session) {
     const sessionKey = getSessionKey(db);
     sessions[sessionKey] = session;
     return session;
   }
+};
+
+const updateSession = (db, response) => {
+  const session = parseCookie(response);
+  return setSession(db, session);
 };
 
 const invalidateSession = db => {
@@ -76,7 +81,7 @@ const extractAuth = (opts) => {
   }
 
   const url = new URL(opts.name);
-  if (!url.username) {
+  if (!url.username && !opts.session) {
     return;
   }
 
@@ -84,10 +89,14 @@ const extractAuth = (opts) => {
     username: url.username,
     password: url.password
   };
+
+  if (opts.session) {
+    setSession(opts, { token: opts.session, expires: Date.now() + oneYearInMs });
+  }
 };
 
 const isValid = (session) => {
-  if (!session || !session.expires) {
+  if (!session?.expires) {
     return false;
   }
   const isExpired =  Date.now() > session.expires;
@@ -113,7 +122,7 @@ function wrapAdapter (PouchDB, HttpPouch) {
   // eslint-disable-next-line func-style
   function HttpSessionPouch(db, callback) {
     extractAuth(db);
-    if (!db.credentials) {
+    if (!db.credentials && !db.session) {
       HttpPouch.call(this, db, callback);
       return;
     }
