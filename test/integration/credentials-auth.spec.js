@@ -89,7 +89,7 @@ describe(`integration with ${authType}`, async function () {
     await db.allDocs();
     await tempDb.allDocs();
 
-    const logs = await collectLogs();
+    const logs = await collectLogs(100);
 
     expect(utils.getDbRequest(auth.username, logs, tempDbName, '/_all_docs').length).to.equal(1);
     expect(utils.getSessionRequests(logs).length).to.equal(1);
