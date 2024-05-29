@@ -45,7 +45,7 @@ const getSessionUrl = (db) => {
 };
 
 const authenticate = async (db) => {
-  if (!db.credentials || !db.credentials.username) {
+  if (!db?.credentials?.username) {
     return;
   }
 
