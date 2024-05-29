@@ -593,6 +593,26 @@ describe('Pouchdb Session authentication plugin', () => {
       expect(fetch.args[3]).to.deep.equal([ 'randomUrl', {} ]);
     });
 
+    it('should continue if session is expired and there is no auth', async () => {
+      db = { name: 'http://localhost:5984/db_name', session: 'abcd' };
+      plugin(PouchDb);
+      PouchDb.adapters.http(db);
+
+      fetch.resolves({ ok: false, status: 401, body: 'omg' });
+      const response = await db.fetch('randomUrl');
+
+      expect(response).to.deep.equal({ ok: false, status: 401, body: 'omg' });
+      expect(fetch.callCount).to.equal(2);
+      expect(fetch.args[0]).to.deep.equal([ 'randomUrl', { headers: new Headers({ 'Cookie': 'AuthSession=abcd' }) } ]);
+      expect(fetch.args[1]).to.deep.equal([ 'randomUrl', { headers: new Headers({ 'Cookie': 'AuthSession=abcd' }) } ]);
+
+      const response2 = await db.fetch('randomUrl');
+
+      expect(response2).to.deep.equal({ ok: false, status: 401, body: 'omg' });
+      expect(fetch.callCount).to.equal(3);
+      expect(fetch.args[2]).to.deep.equal([ 'randomUrl', {} ]);
+    });
+
     it('should continue when session cookie is not returned', async () => {
       db = { name: 'http://localhost:5984/db_name', auth: { username: 'admin', password: 'pass' }};
       plugin(PouchDb);

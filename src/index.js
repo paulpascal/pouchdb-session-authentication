@@ -45,13 +45,17 @@ const getSessionUrl = (db) => {
 };
 
 const authenticate = async (db) => {
+  if (!db.credentials || !db.credentials.username) {
+    return;
+  }
+
   const url = getSessionUrl(db);
 
   const headers = new Headers();
   headers.set('Content-Type', 'application/json');
   headers.set('Accept', 'application/json');
 
-  const body = JSON.stringify({ name: db.credentials?.username, password: db.credentials?.password});
+  const body = JSON.stringify({ name: db.credentials.username, password: db.credentials.password});
   const response = await db.originalFetch(url.toString(), { method: 'POST', headers, body });
   return updateSession(db, response);
 };
