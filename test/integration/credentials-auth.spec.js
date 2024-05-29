@@ -9,7 +9,7 @@ const uuid = require('uuid').v4;
 const utils = require('./utils');
 const authType = process.env.AUTH_TYPE || 'auth';
 
-const getDb = async (dbName, auth, authType, skip_setup = true) => {
+const getDb = (dbName, auth, authType, skip_setup = true) => {
   if (authType === 'url') {
     const url = new URL(`${utils.baseUrl}/${dbName}`);
     url.username = auth.username;
@@ -33,7 +33,7 @@ describe(`integration with ${authType}`, async function () {
   this.timeout(12000);
   before(async () => {
     await utils.setupCouch(dbName);
-    db = await getDb(dbName, utils.dbAuth, authType);
+    db = getDb(dbName, utils.dbAuth, authType);
   });
 
   beforeEach(() => {
@@ -68,7 +68,7 @@ describe(`integration with ${authType}`, async function () {
     const collectLogs = await utils.getDockerContainerLogs();
     await db.allDocs();
 
-    tempDb = await getDb(tempDbName, utils.dbAuth, authType);
+    tempDb = getDb(tempDbName, utils.dbAuth, authType);
     await utils.createDb(tempDbName);
 
     await tempDb.allDocs();
@@ -83,7 +83,7 @@ describe(`integration with ${authType}`, async function () {
     await utils.createAdmin(auth.username, auth.password);
     await utils.createDb(tempDbName);
 
-    tempDb = await getDb(tempDbName, auth, authType);
+    tempDb = getDb(tempDbName, auth, authType);
 
     const collectLogs = await utils.getDockerContainerLogs();
     await db.allDocs();
@@ -101,7 +101,7 @@ describe(`integration with ${authType}`, async function () {
     await utils.createAdmin(auth.username, auth.password);
     await utils.createDb(tempDbName);
 
-    tempDb = await getDb(tempDbName, auth, authType);
+    tempDb = getDb(tempDbName, auth, authType);
 
     const collectLogs = await utils.getDockerContainerLogs();
     await tempDb.allDocs();
@@ -114,7 +114,7 @@ describe(`integration with ${authType}`, async function () {
   });
 
   it('should throw errors on invalid credentials', async () => {
-    const newDb = await getDb(dbName, { username: utils.dbAuth.username, password: 'wrong password' }, authType);
+    const newDb = getDb(dbName, { username: utils.dbAuth.username, password: 'wrong password' }, authType);
 
     const collectLogs = await utils.getDockerContainerLogs();
     await expect(newDb.allDocs()).to.eventually.be.rejectedWith(wrongAuthError);
@@ -142,7 +142,7 @@ describe(`integration with ${authType}`, async function () {
     await utils.createAdmin(auth.username, auth.password);
 
     const collectLogs = await utils.getDockerContainerLogs();
-    tempDb = await getDb(tempDbName, auth, authType, false);
+    tempDb = getDb(tempDbName, auth, authType, false);
     await tempDb.allDocs();
     const logs = await collectLogs(1000);
     expect(utils.getSessionRequests(logs).length).to.equal(1);
@@ -153,7 +153,7 @@ describe(`integration with ${authType}`, async function () {
     await utils.createAdmin(auth.username, auth.password);
     await utils.createDb(tempDbName);
 
-    tempDb = await getDb(tempDbName, auth, authType);
+    tempDb = getDb(tempDbName, auth, authType);
     const collectLogs = await utils.getDockerContainerLogs();
     await Promise.all([
       tempDb.allDocs(),
