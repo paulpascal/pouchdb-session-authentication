@@ -20,17 +20,20 @@ const getDb = (dbName, auth, authType, skip_setup = true) => {
   return new PouchDb(`${utils.baseUrl}/${dbName}`, { skip_setup, auth });
 };
 
-describe(`integration with ${authType}`, function () {
+describe(`integration with ${authType}`, async function () {
   const dbName = 'testdb';
-  const db = getDb(dbName, utils.dbAuth, authType);
+  let db;
 
   let tempDbName;
   let tempAdminName;
   let tempDb;
 
+  const wrongAuthError = 'Authentication required.';
+
   this.timeout(12000);
   before(async () => {
     await utils.setupCouch(dbName);
+    db = getDb(dbName, utils.dbAuth, authType);
   });
 
   beforeEach(() => {
@@ -48,6 +51,7 @@ describe(`integration with ${authType}`, function () {
     await utils.deleteDb(tempDbName);
     await utils.deleteAdmin(tempAdminName);
   });
+
 
   it('should setup session on first request and reuse session on subsequent request', async () => {
     const collectLogs = await utils.getDockerContainerLogs();
@@ -85,7 +89,7 @@ describe(`integration with ${authType}`, function () {
     await db.allDocs();
     await tempDb.allDocs();
 
-    const logs = await collectLogs();
+    const logs = await collectLogs(100);
 
     expect(utils.getDbRequest(auth.username, logs, tempDbName, '/_all_docs').length).to.equal(1);
     expect(utils.getSessionRequests(logs).length).to.equal(1);
@@ -102,7 +106,7 @@ describe(`integration with ${authType}`, function () {
     const collectLogs = await utils.getDockerContainerLogs();
     await tempDb.allDocs();
     await utils.createAdmin(auth.username, 'password change');
-    await expect(tempDb.allDocs()).to.eventually.be.rejectedWith('Name or password is incorrect.');
+    await expect(tempDb.allDocs()).to.eventually.be.rejectedWith(wrongAuthError);
     const logs = await collectLogs();
 
     expect(utils.getSessionRequests(logs, false).length).to.equal(1);
@@ -110,10 +114,10 @@ describe(`integration with ${authType}`, function () {
   });
 
   it('should throw errors on invalid credentials', async () => {
-    const newDb = getDb(dbName, { username: utils.dbAuth.username, password: 'not the right password' }, authType);
+    const newDb = getDb(dbName, { username: utils.dbAuth.username, password: 'wrong password' }, authType);
 
     const collectLogs = await utils.getDockerContainerLogs();
-    await expect(newDb.allDocs()).to.eventually.be.rejectedWith('Name or password is incorrect.');
+    await expect(newDb.allDocs()).to.eventually.be.rejectedWith(wrongAuthError);
     const logs = await collectLogs();
     expect(utils.getSessionRequests(logs, false).length).to.equal(1);
   });

@@ -1,6 +1,6 @@
 {
   "name": "pouchdb-session-authentication",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Plugin that forces session authentication for PouchDb http adapter",
   "main": "src/index.js",
   "scripts": {
@@ -9,9 +9,10 @@
     "test": "npm run lint && npm run unit",
     "start-couch": "cd test/integration && docker-compose up -d",
     "stop-couch": "cd test/integration && docker-compose down --remove-orphans",
-    "integration-auth": "npm run stop-couch && npm run start-couch && mocha ./test/integration/*.spec.js && npm run stop-couch",
-    "integration-url": "npm run stop-couch && npm run start-couch && AUTH_TYPE=url mocha ./test/integration/*.spec.js && npm run stop-couch",
-    "integration": "npm run integration-auth && npm run integration-url"
+    "integration-auth": "npm run stop-couch && npm run start-couch && mocha ./test/integration/credentials*.spec.js && npm run stop-couch",
+    "integration-url": "npm run stop-couch && npm run start-couch && AUTH_TYPE=url mocha ./test/integration/credentials*.spec.js && npm run stop-couch",
+    "integration-session": "npm run stop-couch && npm run start-couch && mocha ./test/integration/session*.spec.js && npm run stop-couch",
+    "integration": "npm run integration-auth && npm run integration-url && npm run integration-session"
   },
   "engines": {
     "node": ">=16.12.0",
