@@ -34,7 +34,7 @@
     "pouchdb-adapter-http": "^8.0.1",
     "pouchdb-core": "^8.0.1",
     "rewire": "^7.0.0",
-    "sinon": "^17.0.1",
+    "sinon": "^18.0.0",
     "uuid": "^9.0.1"
   }
 }
